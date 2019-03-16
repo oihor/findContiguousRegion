@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Eclipse CDT
+/.cproject
+/.project
+/.settings/
+
+# CMake out
+/Debug/
+/Release/
+/out/
