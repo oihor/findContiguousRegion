@@ -13,8 +13,8 @@
 namespace findcontiguousregion {
 
 /**
- * Class for finding a contiguous region of pixels
- * of similar color in an image.
+ * Class ContiguousRegionFinder represents a finding algorithm
+ * for a contiguous region of pixels of similar color in an image.
  *
  * Typical usage is to initialize ContiguousRegionFinder
  * object with an opencv image and call
@@ -47,7 +47,7 @@ public:
     }
 
     /**
-     * Run finding algorithm. Accepts pixel to start from and RGB component deltas
+     * Runs the finding algorithm. Accepts a point to start from and RGB component deltas
      *
      * @param pixelCol - pixel column coordinate
      * @param pixelRow - pixel row coordinate
