@@ -5,6 +5,7 @@
  *      Author: igor
  */
 
+#include <iostream>
 #include <queue>
 
 #include "findcontiguousregion.h"
@@ -14,6 +15,8 @@ namespace findcontiguousregion {
 ContiguousRegionFinder::ContiguousRegionFinder(cv::Mat&& image)
     : _image(image)
 {
+    _visited.clear();
+    _visited.resize(_image.cols * _image.rows, false);
 }
 
 std::vector<ColRow> ContiguousRegionFinder::find(
@@ -37,7 +40,7 @@ std::vector<ColRow> ContiguousRegionFinder::find(
         { 1,  1}
     };
     const ColRow originCoord{pixelCol, pixelRow};
-    const cv::Vec3b originColor = _image.at<cv::Vec3b>(originCoord.col, originCoord.row);
+    const cv::Vec3b originColor = _image.at<cv::Vec3b>(originCoord.row, originCoord.col);
 
     std::vector<ColRow> ret;
     std::queue<ColRow> queue;
@@ -45,22 +48,29 @@ std::vector<ColRow> ContiguousRegionFinder::find(
     queue.push(originCoord);
     ret.push_back(originCoord);
 
+    _visited.clear();
+
     // run till queue is not empty
     while (!queue.empty()) {
         // pop front node from queue and process it
         ColRow coord = queue.front();
         queue.pop();
 
+        std::cout << coord.col << " " << coord.row << std::endl;
+
         // process adjacent pixels of current pixel and
         // enqueue each valid pixel
         for(const ColRow& shift: Shifts) {
             ColRow adjacent{coord.col + shift.col, coord.row + shift.row};
-            if(isContiguous(adjacent, originColor, deltaBlue, deltaGreen, deltaRed)) {
-                // enqueue adjacent pixel
-                queue.push(adjacent);
-                ret.push_back(adjacent);
+            if(!isVisited(adjacent)) {
+                if(isContiguous(adjacent, originColor, deltaBlue, deltaGreen, deltaRed)) {
+                    // enqueue adjacent pixel
+                    queue.push(adjacent);
+                    ret.push_back(adjacent);
+                }
             }
         }
+        setVisited(coord);
     }
 
     return ret;

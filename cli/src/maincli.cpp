@@ -14,6 +14,7 @@
 
 namespace po = boost::program_options;
 using findcontiguousregion::ContiguousRegionFinder;
+using findcontiguousregion::ColRow;
 
 int main(int argc, char *argv[]) {
 
@@ -84,13 +85,20 @@ int main(int argc, char *argv[]) {
     }
 
     ContiguousRegionFinder finder{std::move(image)};
-    auto region = finder.find(
+    std::vector<ColRow> region = finder.find(
         pixelRowCoordinate,
         pixelColCoordinate,
         deltaBlue,
         deltaGreen,
         deltaRed
     );
+
+    image = finder.reset();
+    const cv::Vec3b black{0, 0, 0};
+
+    for(ColRow coord: region) {
+        image.at<cv::Vec3b>(coord.row, coord.col) = black;
+    }
 
     cv::namedWindow("Region", cv::WINDOW_AUTOSIZE);
     cv::imshow("Region", image);
