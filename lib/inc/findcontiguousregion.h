@@ -24,8 +24,8 @@ public:
     cv::Mat reset(cv::Mat&& newImage = cv::Mat{}) {
         cv::Mat ret(std::move(_image));
         _image = std::move(newImage);
-        _visited.clear();
-        _visited.resize(_image.cols * _image.rows, false);
+        _queued.clear();
+        _queued.resize(_image.cols * _image.rows, false);
         return ret;
     }
 
@@ -70,26 +70,26 @@ private:
         return true;
     }
 
-    inline bool isVisited(ColRow coord) const {
+    inline bool isQueued(ColRow coord) const {
         // check for boundaries
         if(coord.col < 0 || coord.col >= _image.cols || coord.row < 0 || coord.row >= _image.rows) {
             return true;
         }
 
-        return _visited[coord.col * coord.row];
+        return _queued[coord.col + coord.row * _image.cols];
     }
 
-    inline void setVisited(ColRow coord) const {
+    inline void setQueued(ColRow coord) const {
         // check for boundaries
         if(coord.col < 0 || coord.col >= _image.cols || coord.row < 0 || coord.row >= _image.rows) {
             return;
         }
 
-        _visited[coord.col * coord.row] = true;
+        _queued[coord.col + coord.row * _image.cols] = true;
     }
 
     cv::Mat _image;
-    mutable std::vector<bool> _visited;
+    mutable std::vector<bool> _queued;
 };
 
 } /* namespace findcontiguousregion */

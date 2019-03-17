@@ -6,13 +6,16 @@
  */
 
 #include <iostream>
-
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 #include "findcontiguousregion.h"
 
+//#define DISPLAY_RESULTING_IMAGE
+
 namespace po = boost::program_options;
+namespace fs = boost::filesystem;
 using findcontiguousregion::ContiguousRegionFinder;
 using findcontiguousregion::ColRow;
 
@@ -24,9 +27,9 @@ int main(int argc, char *argv[]) {
         ("image,i", po::value<std::string>()->required(),       "image file")
         ("row,r",   po::value<uint16_t>()->required(),          "pixel row coordinate")
         ("col,c",   po::value<uint16_t>()->required(),          "pixel column coordinate")
-        ("db",      po::value<uint8_t>()->default_value(16),    "delta for Blue component")
-        ("dg",      po::value<uint8_t>()->default_value(16),    "delta for Green component")
-        ("dr",      po::value<uint8_t>()->default_value(16),    "delta for Red component");
+        ("db",      po::value<uint16_t>()->default_value(32),   "delta for Blue component")
+        ("dg",      po::value<uint16_t>()->default_value(32),   "delta for Green component")
+        ("dr",      po::value<uint16_t>()->default_value(32),   "delta for Red component");
 
 
     po::positional_options_description posDesc;
@@ -63,9 +66,9 @@ int main(int argc, char *argv[]) {
     std::string imageFilePath   = vm["image"].as<std::string>();
     uint16_t pixelRowCoordinate = vm["row"].as<uint16_t>();
     uint16_t pixelColCoordinate = vm["col"].as<uint16_t>();
-    uint8_t  deltaBlue          = vm["db"].as<uint8_t>();
-    uint8_t  deltaGreen         = vm["dg"].as<uint8_t>();
-    uint8_t  deltaRed           = vm["dr"].as<uint8_t>();
+    uint16_t deltaBlue          = vm["db"].as<uint16_t>();
+    uint16_t deltaGreen         = vm["dg"].as<uint16_t>();
+    uint16_t deltaRed           = vm["dr"].as<uint16_t>();
 
     std::cout
         << "image " << imageFilePath        << std::endl
@@ -100,9 +103,16 @@ int main(int argc, char *argv[]) {
         image.at<cv::Vec3b>(coord.row, coord.col) = black;
     }
 
+    cv::imwrite(
+        std::string("out.") + fs::path(imageFilePath).filename().string(),
+        image
+    );
+
+#ifdef DISPLAY_RESULTING_IMAGE
     cv::namedWindow("Region", cv::WINDOW_AUTOSIZE);
     cv::imshow("Region", image);
     cv::waitKey(0);
+#endif
 
     return EXIT_SUCCESS;
 }

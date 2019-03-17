@@ -15,8 +15,7 @@ namespace findcontiguousregion {
 ContiguousRegionFinder::ContiguousRegionFinder(cv::Mat&& image)
     : _image(image)
 {
-    _visited.clear();
-    _visited.resize(_image.cols * _image.rows, false);
+    _queued.resize(_image.cols * _image.rows, false);
 }
 
 std::vector<ColRow> ContiguousRegionFinder::find(
@@ -45,32 +44,33 @@ std::vector<ColRow> ContiguousRegionFinder::find(
     std::vector<ColRow> ret;
     std::queue<ColRow> queue;
 
+    _queued.clear();
+    _queued.resize(_image.cols * _image.rows, false);
+
     queue.push(originCoord);
+    setQueued(originCoord);
     ret.push_back(originCoord);
 
-    _visited.clear();
-
     // run till queue is not empty
-    while (!queue.empty()) {
+    while(!queue.empty()) {
         // pop front node from queue and process it
         ColRow coord = queue.front();
         queue.pop();
-
-        std::cout << coord.col << " " << coord.row << std::endl;
 
         // process adjacent pixels of current pixel and
         // enqueue each valid pixel
         for(const ColRow& shift: Shifts) {
             ColRow adjacent{coord.col + shift.col, coord.row + shift.row};
-            if(!isVisited(adjacent)) {
-                if(isContiguous(adjacent, originColor, deltaBlue, deltaGreen, deltaRed)) {
-                    // enqueue adjacent pixel
-                    queue.push(adjacent);
-                    ret.push_back(adjacent);
-                }
+            if(!isQueued(adjacent)
+                && isContiguous(adjacent, originColor, deltaBlue, deltaGreen, deltaRed)
+            ) {
+                // enqueue adjacent pixel
+                queue.push(adjacent);
+                setQueued(adjacent);
+                ret.push_back(adjacent);
             }
         }
-        setVisited(coord);
+
     }
 
     return ret;
