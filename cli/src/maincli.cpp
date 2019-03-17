@@ -17,7 +17,6 @@
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using findcontiguousregion::ContiguousRegionFinder;
-using findcontiguousregion::ColRow;
 
 int main(int argc, char *argv[]) {
 
@@ -88,7 +87,7 @@ int main(int argc, char *argv[]) {
     }
 
     ContiguousRegionFinder finder{std::move(image)};
-    std::vector<ColRow> region = finder.find(
+    std::vector<cv::Point> region = finder.find(
         pixelRowCoordinate,
         pixelColCoordinate,
         deltaBlue,
@@ -99,8 +98,8 @@ int main(int argc, char *argv[]) {
     image = finder.reset();
     const cv::Vec3b black{0, 0, 0};
 
-    for(ColRow coord: region) {
-        image.at<cv::Vec3b>(coord.row, coord.col) = black;
+    for(cv::Point coord: region) {
+        image.at<cv::Vec3b>(coord) = black;
     }
 
     cv::imwrite(

@@ -12,11 +12,6 @@
 
 namespace findcontiguousregion {
 
-struct ColRow {
-    int col = 0;
-    int row = 0;
-};
-
 class ContiguousRegionFinder {
 public:
     ContiguousRegionFinder(cv::Mat&& image);
@@ -29,7 +24,7 @@ public:
         return ret;
     }
 
-    std::vector<ColRow> find(
+    std::vector<cv::Point> find(
         uint16_t pixelCol,
         uint16_t pixelRow,
         uint8_t deltaBlue = 16,
@@ -47,19 +42,19 @@ private:
     // check for visited inside isContiguous
 
     inline bool isContiguous(
-        ColRow coord,
+        cv::Point coord,
         cv::Vec3b originColor,
         uint8_t deltaBlue,
         uint8_t deltaGreen,
         uint8_t deltaRed
     ) const {
         // check for boundaries
-        if(coord.col < 0 || coord.col >= _image.cols || coord.row < 0 || coord.row >= _image.rows) {
+        if(coord.x < 0 || coord.x >= _image.cols || coord.y < 0 || coord.y >= _image.rows) {
             return false;
         }
 
         // check for color components delta
-        cv::Vec3b pixelColor = _image.at<cv::Vec3b>(coord.row, coord.col);
+        cv::Vec3b pixelColor = _image.at<cv::Vec3b>(coord);
         if(    absDiff(pixelColor[0], originColor[0]) > deltaBlue
             || absDiff(pixelColor[1], originColor[1]) > deltaGreen
             || absDiff(pixelColor[2], originColor[2]) > deltaRed
@@ -70,22 +65,22 @@ private:
         return true;
     }
 
-    inline bool isQueued(ColRow coord) const {
+    inline bool isQueued(cv::Point coord) const {
         // check for boundaries
-        if(coord.col < 0 || coord.col >= _image.cols || coord.row < 0 || coord.row >= _image.rows) {
+        if(coord.x < 0 || coord.x >= _image.cols || coord.y < 0 || coord.y >= _image.rows) {
             return true;
         }
 
-        return _queued[coord.col + coord.row * _image.cols];
+        return _queued[coord.x + coord.y * _image.cols];
     }
 
-    inline void setQueued(ColRow coord) const {
+    inline void setQueued(cv::Point coord) const {
         // check for boundaries
-        if(coord.col < 0 || coord.col >= _image.cols || coord.row < 0 || coord.row >= _image.rows) {
+        if(coord.x < 0 || coord.x >= _image.cols || coord.y < 0 || coord.y >= _image.rows) {
             return;
         }
 
-        _queued[coord.col + coord.row * _image.cols] = true;
+        _queued[coord.x + coord.y * _image.cols] = true;
     }
 
     cv::Mat _image;

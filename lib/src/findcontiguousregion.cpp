@@ -18,7 +18,7 @@ ContiguousRegionFinder::ContiguousRegionFinder(cv::Mat&& image)
     _queued.resize(_image.cols * _image.rows, false);
 }
 
-std::vector<ColRow> ContiguousRegionFinder::find(
+std::vector<cv::Point> ContiguousRegionFinder::find(
     uint16_t pixelCol,
     uint16_t pixelRow,
     uint8_t deltaBlue,
@@ -28,7 +28,7 @@ std::vector<ColRow> ContiguousRegionFinder::find(
 {
     // Below array details 8 possible movements
     // Probably could also be 4 - East, West, South, North
-    const ColRow Shifts[] = {
+    const cv::Point Shifts[] = {
         {-1, -1},
         {-1,  0},
         {-1,  1},
@@ -38,11 +38,11 @@ std::vector<ColRow> ContiguousRegionFinder::find(
         { 1,  0},
         { 1,  1}
     };
-    const ColRow originCoord{pixelCol, pixelRow};
-    const cv::Vec3b originColor = _image.at<cv::Vec3b>(originCoord.row, originCoord.col);
+    const cv::Point originCoord{pixelCol, pixelRow};
+    const cv::Vec3b originColor = _image.at<cv::Vec3b>(originCoord);
 
-    std::vector<ColRow> ret;
-    std::queue<ColRow> queue;
+    std::vector<cv::Point> ret;
+    std::queue<cv::Point> queue;
 
     _queued.clear();
     _queued.resize(_image.cols * _image.rows, false);
@@ -54,13 +54,13 @@ std::vector<ColRow> ContiguousRegionFinder::find(
     // run till queue is not empty
     while(!queue.empty()) {
         // pop front node from queue and process it
-        ColRow coord = queue.front();
+        cv::Point coord = queue.front();
         queue.pop();
 
         // process adjacent pixels of current pixel and
         // enqueue each valid pixel
-        for(const ColRow& shift: Shifts) {
-            ColRow adjacent{coord.col + shift.col, coord.row + shift.row};
+        for(const cv::Point& shift: Shifts) {
+            cv::Point adjacent{coord.x + shift.x, coord.y + shift.y};
             if(!isQueued(adjacent)
                 && isContiguous(adjacent, originColor, deltaBlue, deltaGreen, deltaRed)
             ) {
