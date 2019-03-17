@@ -40,3 +40,4 @@ Marks the contiguous region with black color and ouputs image to out.inputFilena
 * https://www.techiedelight.com/flood-fill-algorithm
 * https://www.hackerearth.com/practice/algorithms/graphs/flood-fill-algorithm/tutorial
 * https://techdifferences.com/difference-between-bfs-and-dfs.html
+* https://stackoverflow.com/questions/935992/find-images-of-similar-color
