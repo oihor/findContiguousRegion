@@ -38,12 +38,12 @@ private:
         return (a > b) ? a - b : b - a;
     }
 
-    // following three functions can be optimized for less boundaries checks
-    // check for visited inside isContiguous
+    // following functions can be optimized for less boundaries checks
+    // check for queued inside isContiguous
 
     inline bool isContiguous(
-        cv::Point coord,
-        cv::Vec3b originColor,
+        const cv::Point& coord,
+        const cv::Vec3b& originColor,
         uint8_t deltaBlue,
         uint8_t deltaGreen,
         uint8_t deltaRed
@@ -54,7 +54,7 @@ private:
         }
 
         // check for color components delta
-        cv::Vec3b pixelColor = _image.at<cv::Vec3b>(coord);
+        const cv::Vec3b& pixelColor = _image.at<cv::Vec3b>(coord);
         if(    absDiff(pixelColor[0], originColor[0]) > deltaBlue
             || absDiff(pixelColor[1], originColor[1]) > deltaGreen
             || absDiff(pixelColor[2], originColor[2]) > deltaRed
@@ -65,7 +65,7 @@ private:
         return true;
     }
 
-    inline bool isQueued(cv::Point coord) const {
+    inline bool isQueued(const cv::Point& coord) const {
         // check for boundaries
         if(coord.x < 0 || coord.x >= _image.cols || coord.y < 0 || coord.y >= _image.rows) {
             return true;
@@ -74,7 +74,7 @@ private:
         return _queued[coord.x + coord.y * _image.cols];
     }
 
-    inline void setQueued(cv::Point coord) const {
+    inline void setQueued(const cv::Point& coord) const {
         // check for boundaries
         if(coord.x < 0 || coord.x >= _image.cols || coord.y < 0 || coord.y >= _image.rows) {
             return;
@@ -84,7 +84,7 @@ private:
     }
 
     cv::Mat _image;
-    mutable std::vector<bool> _queued;
+    mutable std::vector<uint8_t> _queued;
 };
 
 } /* namespace findcontiguousregion */

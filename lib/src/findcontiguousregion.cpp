@@ -26,24 +26,26 @@ std::vector<cv::Point> ContiguousRegionFinder::find(
     uint8_t deltaRed
 ) const
 {
-    // Below array details 8 possible movements
-    // Probably could also be 4 - East, West, South, North
+    // Below array details 8(4) possible movements
+    // 4 - East, West, South, North
+    // valgrind shows 4 movements take less cycles
     const cv::Point Shifts[] = {
-        {-1, -1},
+//        {-1, -1},
         {-1,  0},
-        {-1,  1},
+//        {-1,  1},
         { 0, -1},
         { 0,  1},
-        { 1, -1},
+//        { 1, -1},
         { 1,  0},
-        { 1,  1}
+//        { 1,  1}
     };
     const cv::Point originCoord{pixelCol, pixelRow};
     const cv::Vec3b originColor = _image.at<cv::Vec3b>(originCoord);
 
     std::vector<cv::Point> ret;
-    std::queue<cv::Point> queue;
+    std::queue<cv::Point> queue; // deque in my gcc
 
+    ret.reserve(_image.cols * _image.rows / 4);
     _queued.clear();
     _queued.resize(_image.cols * _image.rows, false);
 

@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
     image = finder.reset();
     const cv::Vec3b black{0, 0, 0};
 
-    for(cv::Point coord: region) {
+    for(const cv::Point& coord: region) {
         image.at<cv::Vec3b>(coord) = black;
     }
 
