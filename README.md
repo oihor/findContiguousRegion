@@ -22,7 +22,7 @@ Runs the finding algorithm. Accepts a point to start from and RGB component delt
 
 
 ## CLI API
-Options:
+Options:  
   -h [ --help ]         Help  
   -i [ --image ] arg    image file  
   -r [ --row ] arg      pixel row coordinate   
