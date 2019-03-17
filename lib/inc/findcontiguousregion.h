@@ -12,10 +12,32 @@
 
 namespace findcontiguousregion {
 
+/**
+ * Class for finding a contiguous region of pixels
+ * of similar color in an image.
+ *
+ * Typical usage is to initialize ContiguousRegionFinder
+ * object with an opencv image and call
+ * find() function
+ */
+
 class ContiguousRegionFinder {
 public:
+
+
+    /**
+     * Constructs a ContiguousRegionFinder finder object
+     *
+     * @param image is an opencv image to be moved and owned by the finder object
+     */
     ContiguousRegionFinder(cv::Mat&& image);
 
+    /**
+     * Reset the opencv image owned by the finder object
+     *
+     * @param newImage - new image object to be moved and owned (or empty image)
+     * @return previously stored image
+     */
     cv::Mat reset(cv::Mat&& newImage = cv::Mat{}) {
         cv::Mat ret(std::move(_image));
         _image = std::move(newImage);
@@ -24,6 +46,16 @@ public:
         return ret;
     }
 
+    /**
+     * Run finding algorithm. Accepts pixel to start from and RGB component deltas
+     *
+     * @param pixelCol - pixel column coordinate
+     * @param pixelRow - pixel row coordinate
+     * @param deltaBlue - delta for Blue component
+     * @param deltaGreen - delta for Green component
+     * @param deltaRed - delta for Red component
+     * @return vector of points of the contiguous region
+     */
     std::vector<cv::Point> find(
         uint16_t pixelCol,
         uint16_t pixelRow,
