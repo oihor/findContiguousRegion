@@ -8,12 +8,56 @@
 #ifndef CLI_FINDCONTIGUOUSREGION_H_
 #define CLI_FINDCONTIGUOUSREGION_H_
 
+#include <opencv2/core/core.hpp>
+
 namespace findcontiguousregion {
 
-class findcontiguousregion {
+struct ColRow {
+    int col = 0;
+    int row = 0;
+};
+
+class ContiguousRegionFinder {
 public:
-    findcontiguousregion();
-    virtual ~findcontiguousregion();
+    ContiguousRegionFinder(cv::Mat&& image);
+    std::vector<ColRow> find(
+        uint16_t pixelCol,
+        uint16_t pixelRow,
+        uint8_t deltaBlue = 16,
+        uint8_t deltaGreen = 16,
+        uint8_t deltaRed = 16
+    ) const;
+private:
+
+    static inline uchar absDiff(uchar a, uchar b) {
+        return (a > b) ? a - b : b - a;
+    }
+
+    inline bool isContiguous(
+        ColRow coord,
+        cv::Vec3b originColor,
+        uint8_t deltaBlue,
+        uint8_t deltaGreen,
+        uint8_t deltaRed
+    ) const {
+        // check for boundaries
+        if(coord.col < 0 || coord.col >= _image.cols || coord.row < 0 || coord.row >= _image.rows) {
+            return false;
+        }
+
+        // check for color components delta
+        cv::Vec3b pixelColor = _image.at<cv::Vec3b>(coord.col, coord.row);
+        if(    absDiff(pixelColor[0], originColor[0]) > deltaBlue
+            || absDiff(pixelColor[1], originColor[1]) > deltaGreen
+            || absDiff(pixelColor[2], originColor[2]) > deltaRed
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    cv::Mat _image;
 };
 
 } /* namespace findcontiguousregion */
