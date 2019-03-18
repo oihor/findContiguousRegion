@@ -85,8 +85,19 @@ private:
             return false;
         }
 
-        // check for color components delta
         const cv::Vec3b& pixelColor = _image.at<cv::Vec3b>(coord);
+
+//        // although total color distance could be more appropriate
+//        uint32_t total = 0;
+//        for(size_t i = 0; i < pixelColor.channels; ++i) {
+//            int diff = int(pixelColor[0]) - int(originColor[0]);
+//            total += diff * diff;
+//        }
+//        if(total > distance * distance) {
+//            return false;
+//        }
+
+        // check for color components delta
         if(    absDiff(pixelColor[0], originColor[0]) > deltaBlue
             || absDiff(pixelColor[1], originColor[1]) > deltaGreen
             || absDiff(pixelColor[2], originColor[2]) > deltaRed
