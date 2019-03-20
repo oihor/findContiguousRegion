@@ -17,6 +17,8 @@
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using findcontiguousregion::ContiguousRegionFinder;
+using findcontiguousregion::IsColorDistanceClose;
+using findcontiguousregion::AreColorComponentsClose;
 
 int main(int argc, char *argv[]) {
 
@@ -26,6 +28,7 @@ int main(int argc, char *argv[]) {
         ("image,i", po::value<std::string>()->required(),       "image file")
         ("row,r",   po::value<uint16_t>()->required(),          "pixel row coordinate")
         ("col,c",   po::value<uint16_t>()->required(),          "pixel column coordinate")
+        ("dist,d",  po::value<uint16_t>()->default_value(64),   "total color distance (sqrt(sum(pow(componentDistance,2)))")
         ("db",      po::value<uint16_t>()->default_value(32),   "delta for Blue component")
         ("dg",      po::value<uint16_t>()->default_value(32),   "delta for Green component")
         ("dr",      po::value<uint16_t>()->default_value(32),   "delta for Red component");
@@ -65,17 +68,27 @@ int main(int argc, char *argv[]) {
     std::string imageFilePath   = vm["image"].as<std::string>();
     uint16_t pixelRowCoordinate = vm["row"].as<uint16_t>();
     uint16_t pixelColCoordinate = vm["col"].as<uint16_t>();
+    uint16_t distance           = vm["dist"].as<uint16_t>();
     uint16_t deltaBlue          = vm["db"].as<uint16_t>();
     uint16_t deltaGreen         = vm["dg"].as<uint16_t>();
     uint16_t deltaRed           = vm["dr"].as<uint16_t>();
+
+    bool useDistance = !vm["dist"].defaulted()
+        || (vm["db"].defaulted() && vm["dg"].defaulted() && vm["dr"].defaulted());
 
     std::cout
         << "image " << imageFilePath        << std::endl
         << "row "   << pixelRowCoordinate   << std::endl
         << "col "   << pixelColCoordinate   << std::endl
+        << "dist "  << distance             << std::endl
         << "db "    << deltaBlue            << std::endl
         << "dg "    << deltaGreen           << std::endl
         << "dr "    << deltaRed             << std::endl;
+
+    if(useDistance)
+        std::cout << "using color distance" << std::endl;
+    else
+        std::cout << "using color component delta" << std::endl;
 
     // B G R order
     // RGB could be not the best solution, but assume from the task that
@@ -87,13 +100,28 @@ int main(int argc, char *argv[]) {
     }
 
     ContiguousRegionFinder finder{std::move(image)};
-    std::vector<cv::Point> region = finder.find(
-        pixelRowCoordinate,
-        pixelColCoordinate,
-        deltaBlue,
-        deltaGreen,
-        deltaRed
-    );
+    std::vector<cv::Point> region = useDistance ?
+        finder.find(
+            cv::Point{
+                pixelColCoordinate,
+                pixelRowCoordinate
+            },
+            IsColorDistanceClose{
+                distance
+            }
+        )
+    :
+        finder.find(
+            cv::Point{
+                pixelColCoordinate,
+                pixelRowCoordinate
+            },
+            AreColorComponentsClose{
+                deltaBlue,
+                deltaGreen,
+                deltaRed
+            }
+        );
 
     image = finder.reset();
     const cv::Vec3b black{0, 0, 0};

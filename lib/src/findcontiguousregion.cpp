@@ -5,9 +5,6 @@
  *      Author: igor
  */
 
-#include <iostream>
-#include <queue>
-
 #include "findcontiguousregion.h"
 
 namespace findcontiguousregion {
@@ -18,63 +15,11 @@ ContiguousRegionFinder::ContiguousRegionFinder(cv::Mat&& image)
     _queued.resize(_image.cols * _image.rows, false);
 }
 
-std::vector<cv::Point> ContiguousRegionFinder::find(
-    uint16_t pixelCol,
-    uint16_t pixelRow,
-    uint8_t deltaBlue,
-    uint8_t deltaGreen,
-    uint8_t deltaRed
-) const
-{
-    // Below array details 8(4) possible movements
-    // 4 - East, West, South, North
-    // valgrind shows 4 movements take less cycles
-    const cv::Point Shifts[] = {
-//        {-1, -1},
-        {-1,  0},
-//        {-1,  1},
-        { 0, -1},
-        { 0,  1},
-//        { 1, -1},
-        { 1,  0},
-//        { 1,  1}
-    };
-    const cv::Point originCoord{pixelCol, pixelRow};
-    const cv::Vec3b originColor = _image.at<cv::Vec3b>(originCoord);
-
-    std::vector<cv::Point> ret;
-    std::queue<cv::Point> queue; // deque in my gcc
-
-    ret.reserve(_image.cols * _image.rows / 4);
+cv::Mat ContiguousRegionFinder::reset(cv::Mat&& newImage) {
+    cv::Mat ret(std::move(_image));
+    _image = std::move(newImage);
     _queued.clear();
     _queued.resize(_image.cols * _image.rows, false);
-
-    queue.push(originCoord);
-    setQueued(originCoord);
-    ret.push_back(originCoord);
-
-    // run till queue is not empty
-    while(!queue.empty()) {
-        // pop front node from queue and process it
-        cv::Point coord = queue.front();
-        queue.pop();
-
-        // process adjacent pixels of current pixel and
-        // enqueue each valid pixel
-        for(const cv::Point& shift: Shifts) {
-            cv::Point adjacent{coord.x + shift.x, coord.y + shift.y};
-            if(!isQueued(adjacent)
-                && isContiguous(adjacent, originColor, deltaBlue, deltaGreen, deltaRed)
-            ) {
-                // enqueue adjacent pixel
-                queue.push(adjacent);
-                setQueued(adjacent);
-                ret.push_back(adjacent);
-            }
-        }
-
-    }
-
     return ret;
 }
 
